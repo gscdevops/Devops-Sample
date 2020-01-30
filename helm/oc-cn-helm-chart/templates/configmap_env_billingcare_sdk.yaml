@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-    name: {{ .Values.ocbc.bc.configEnvSDK.name }}
-    namespace: {{ .Release.Namespace }}
-data:
-    SDKRSP_DEPLOY_NAME: {{ .Values.ocbc.bc.configEnvSDK.deployName }}
-    APP_DEPLOYMENT_PLAN: {{ .Values.ocbc.bc.deployment.volMntDeployPlan.mountPath }}/{{ .Values.ocbc.bc.configEnvSDK.planFileName }}
