@@ -1,0 +1,49 @@
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+ name: oms-rel-input
+ labels:
+   application: oms
+spec:
+ storageClassName: {{ .Values.ocbrm.storage_class.name }}
+ accessModes:
+   - ReadWriteMany
+ resources:
+   requests:
+     storage: 1Gi
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+ name: oms-rel-archive
+ labels:
+   application: oms
+spec:
+ storageClassName: {{ .Values.ocbrm.storage_class.name }}
+ accessModes:
+   - ReadWriteMany
+ resources:
+   requests:
+     storage: 1Gi
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+ name: oms-rel-reject
+ labels:
+   application: oms
+spec:
+ storageClassName: {{ .Values.ocbrm.storage_class.name }}
+ accessModes:
+   - ReadWriteMany
+ resources:
+   requests:
+     storage: 1Gi
+
+---

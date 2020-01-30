@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: {{ .Values.ocboc.boc.persistentVolOpssPolicy.name }}
+    namespace: {{ .Release.Namespace }} 
+    labels:
+        type: local
+spec:
+    storageClassName: {{ .Values.ocboc.boc.storageClassOpssPolicy.name }}
+    capacity:
+        storage: {{ .Values.ocboc.boc.persistentVolOpssPolicy.capacity }}
+    accessModes:
+    -   ReadWriteOnce
+    hostPath:
+        path: {{ .Values.ocboc.boc.persistentVolOpssPolicy.hostPath }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: {{ .Values.ocboc.boc.persistentVolClaimOpssPolicy.name }}
+    namespace: {{ .Release.Namespace }}
+spec:
+    storageClassName: {{ .Values.ocboc.boc.storageClassOpssPolicy.name }}
+    accessModes:
+    -   ReadWriteOnce
+    resources:
+        requests:
+            storage: {{ .Values.ocboc.boc.persistentVolOpssPolicy.capacity }}
+    volumeName: {{ .Values.ocboc.boc.persistentVolOpssPolicy.name }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: {{ .Values.ocboc.boc.persistentVolThirdparty.name }}
+    namespace: {{ .Release.Namespace }}
+    labels:
+        type: local
+spec:
+    storageClassName: {{ .Values.ocboc.boc.storageClassThirdparty.name }}
+    capacity:
+        storage: {{ .Values.ocboc.boc.persistentVolThirdparty.capacity }}
+    accessModes:
+    -   ReadWriteOnce
+    hostPath:
+        path: {{ .Values.ocboc.boc.persistentVolThirdparty.hostPath }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: {{ .Values.ocboc.boc.persistentVolClaimThirdparty.name }}
+    namespace: {{ .Release.Namespace }}
+spec:
+    storageClassName: {{ .Values.ocboc.boc.storageClassThirdparty.name }}
+    accessModes:
+    -   ReadWriteOnce
+    resources:
+        requests:
+            storage: {{ .Values.ocboc.boc.persistentVolThirdparty.capacity }}
+    volumeName: {{ .Values.ocboc.boc.persistentVolThirdparty.name }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: {{ .Values.ocboc.boc.persistentVolLib.name }}
+    namespace: {{ .Release.Namespace }}
+    labels:
+        type: local
+spec:
+    storageClassName: {{ .Values.ocboc.boc.storageClassLib.name }}
+    capacity:
+        storage: {{ .Values.ocboc.boc.persistentVolLib.capacity }}
+    accessModes:
+    -   ReadWriteOnce
+    hostPath:
+        path: {{ .Values.ocboc.boc.persistentVolLib.hostPath }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: {{ .Values.ocboc.boc.persistentVolClaimLib.name }}
+    namespace: {{ .Release.Namespace }}
+spec:
+    storageClassName: {{ .Values.ocboc.boc.storageClassLib.name }}
+    accessModes:
+    -   ReadWriteOnce
+    resources:
+        requests:
+            storage: {{ .Values.ocboc.boc.persistentVolLib.capacity }}
+    volumeName: {{ .Values.ocboc.boc.persistentVolLib.name }}            

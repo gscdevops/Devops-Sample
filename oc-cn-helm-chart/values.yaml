@@ -1,0 +1,819 @@
+# Default values for mychart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# For non-empty repository, "/" MUST be appended
+imageRepository: ""
+
+ocbrm:
+    imagePullPolicy: IfNotPresent
+    # Set init_database: false , if custom docker images are built
+    init_database: true
+    # Set existing_database: true , if existing database is used (non init-db )
+    existing_database: false
+    # Give the path where client wallet is copied inside hostPath ( existing_wallet: /scratch/wallet/client)
+    existing_wallet: /
+    TZ: UTC
+    logDir: /oms_logs
+    tnsAdmin: /oms/ora_k8
+    LOG_LEVEL: 1
+    ENABLE_SSL: 1
+    isSSLEnabled: true
+    brm_crypt_key: 
+    brm_root_pass: 
+    wallet:
+        client: 
+        server: 
+        root: 
+        pv: brm-wallet-pv
+        pvc: brm-wallet-pvc
+        storage: 50Mi
+    cm:
+        deployment:
+            replicaCount: 1
+            imageName: cm
+            imageTag: 12.0.0.2.0
+            host: cm
+            port: 11960
+            #Set load_localized to 0 to skip loading load_localized_strings in case of existing DB
+            load_localized: 1
+        service:
+            type: ClusterIP
+            dnsName: ocbrm.example.com
+
+    eai_js:
+        deployment:
+            replicaCount: 1
+            imageName: eai_js
+            imageTag: 12.0.0.2.0
+            host: eai-js
+            port: 11930
+        service:
+            type: ClusterIP
+
+    payload:
+        pv: brm-payload-pv
+        pvc: brm-payload-pvc
+        storage: 10Mi
+        path: /
+
+    dm_oracle:
+        deployment:
+            replicaCount: 1
+            imageName: dm_oracle
+            imageTag: 12.0.0.2.0
+            host: dm-oracle
+            port: 12950
+        service:
+            type: ClusterIP
+
+    dm_invoice:
+        deployment:
+            replicaCount: 1
+            imageName: dm_invoice
+            imageTag: 12.0.0.2.0
+            host: dm-invoice
+            port: 27777
+        service:
+            type: ClusterIP
+
+    dm_ldap:
+        deployment:
+            replicaCount: 1
+            imageName: dm_ldap
+            imageTag: 12.0.0.2.0
+            host: dm-ldap
+            port: 12850
+            dirserverpassword: cG1u
+        service:
+            type: ClusterIP
+
+    dm_prov_telco:
+        deployment:
+            replicaCount: 1
+            imageName: dm_prov_telco
+            imageTag: 12.0.0.2.0
+            host: dm-prov
+            port: 20315
+        service:
+            type: ClusterIP
+
+    storage_class:
+        name: green
+        provisioner: example.com/nfs
+        mountOptions: vers=4.1
+
+    virtual_time:
+        enabled: false
+        pvt: /oms/virtual_time/shared
+        pvc: virtual-time
+        storage: 50Mi
+
+    db:
+        deployment:
+            imageName: init_db
+            imageTag: 12.0.0.2.0
+        host: localhost
+        port: 1521
+        service: pindb
+        alias: pindb
+        schemauser: pin
+        schemapass: 
+        schematablespace: pin
+        indextablespace: pinx
+        nls_lang: AMERICAN_AMERICA.AL32UTF8
+        charset: AL32UTF8
+        pipelineschemauser: pin
+        pipelineschemapass: 
+        pipelineschematablespace: pin
+        pipelineindextablespace: pinx
+        pipelinealias: PINDB
+        queuename: IFW_SYNC_QUEUE
+
+    dm_fusa:
+        deployment:
+            replicaCount: 1
+            imageName: dm_fusa
+            imageTag: 12.0.0.2.0
+            simulatorTag: 12.0.0.2.0
+            host: dm-fusa
+            port: 15772
+            dmf_sid_pwd: 
+            dmf_pid_pwd: 
+        service:
+            type: ClusterIP
+        tempdir:
+            pvc: fusa-temp
+            storage: 50Mi
+
+    dm_vertex:
+        deployment:
+            replicaCount: 1
+            imageName: dm_vertex
+            imageTag: 12.0.0.2.0
+            host: dm-vertex
+            port: 31274
+            ctqCfg: /oms/vertex/32bit/cfg 
+            ctqCfgName: CTQ Test
+            ctqSmObj: ./dm_vertex_ctq300.so
+        service:
+            type: ClusterIP
+        ctqdir:
+            pvc: ctqdir
+            storage: 50Mi
+
+    realtime_pvc:
+        pvc: common-semaphore
+        path: /
+        storage: 50Mi
+
+    realtimepipe:
+        deployment:
+            replicaCount: 1
+            imageName: realtimepipe
+            imageTag: 12.0.0.2.0
+            port: 24000
+            rtp_num_thread: 8
+            rtp_num_pipe: 2
+            discount_trace: True
+            logPipeDir: /oms/ifw/log/pipeline
+            logProcessDir: /oms/ifw/log/process
+        service:
+            type: ClusterIP
+
+    batch_controller:
+        deployment:
+            replicaCount: 1
+        image: batch_controller
+        host: batch-controller
+        imageTag: 12.0.0.2.0
+        pvc:
+            path: /
+            archive: oms-uel-archive
+            reject: oms-uel-reject
+            input: oms-uel-input
+            storage: 50Mi
+
+    dm_ifw_sync:
+      deployment:
+        imageName: dm_ifw_sync
+        imageTag: 12.0.0.2.0
+        host: dm-ifw
+        port: 11999
+        replicaCount: 1
+      service:
+        type: ClusterIP
+
+    dm_eai:
+      deployment:
+        imageName: dm_eai
+        imageTag: 12.0.0.2.0
+        host: dm-eai
+        port: 11970
+        replicaCount: 1
+      service:
+        type: ClusterIP
+
+    dm_aq:
+      deployment:
+        imageName: dm_aq
+        imageTag: 12.0.0.2.0
+        host: dm-aq
+        port: 17513
+        replicaCount: 1
+      service:
+        type: ClusterIP
+
+    rel_daemon:
+      deployment:
+        imageName: rel_daemon
+        imageTag: 12.0.0.2.0
+        replicaCount: 1
+
+    batchpipe:
+        deployment:
+            replicaCount: 1
+            imageName: batch_pipeline
+            imageTag: 12.0.0.2.0
+            port: 24001
+            logPipeDir: /oms/ifw/log/pipeline
+            logProcessDir: /oms/ifw/log/process
+        service:
+            type: ClusterIP
+
+    formatter:
+      deployment:
+        imageName: formatter
+        imageTag: 12.0.0.2.0
+        replicaCount: 1
+        host: formatter
+        port: 22272
+        logLevel: 3
+        jsLogLevel: 3
+        pxsltLogLevel: 3
+      service:
+        type: ClusterIP
+
+    brm_apps:
+        deployment:
+            replicaCount: 1
+            imageName: brm_apps
+            imageTag: 12.0.0.2.0
+            host: brm-apps
+
+    cronjob:
+        deployment:
+            app_name: pin-collections-process
+            imageName: kubectl
+            imageTag: 12.0.0.2.0
+            schedule: "*/5 * * * *"
+            serviceAccountName: job-scheduler
+            app_dir: /oms/apps/pin_collections
+            app_cmd: pin_collections_process
+            app_cmd_args: "-verbose"
+
+ocpdc:
+
+    labels:
+        name: "pdc"
+        version: "12.0.0.2.0"
+    deployment:
+        deadlineSeconds: 900
+        revisionHistLimit: 10
+        imageName: "oracle/pdcapp"
+        # For non-empty tag, ":" MUST be prepended
+        imageTag: ":12.0.0.2.0"
+        imagePullPolicy: IfNotPresent
+        volMntKeyStore:
+                name: "pdc-keystore-volume"
+                mountPath: "/u01/app/share/keystore"
+        volMntPolicy:
+                name: "pdc-policy-volume"
+                mountPath: "/u01/app/share/policy"
+        volMntLogs:
+                name: "pdc-log-volume"
+                mountPath: "/u01/app/share/PDC_LOGS"                
+        volumeMounts:
+                - name: virtual-time-volume
+                  mountPath: /oms/virtual_time/shared
+                - name: pin-conf-config-billing-invoicing-volume-2
+                  mountPath: /oms/pin_confs2
+                - name: infranet-properties-billing-invoicing-volume
+                  mountPath: /oms/infranets
+    configEnv:
+        name: "pdc-configmap-env"
+        httpPort: 7011
+        httpsPort: 7012
+        # t3ChannelPort is mandatory, default is 0
+        t3ChannelPort: 0 
+        # t3AddressAddress is optional,else provide master node IP or Load balancer IP
+        t3ChannelAddress: 
+        # t3sChannelPort is mandatory, default is 0
+        t3sChannelPort: 0 
+        # t3sAddressAddress is optional,else provide master node IP or Load balancer IP
+        t3sChannelAddress: 
+        isSSLEnabled: false
+        # adminUser should be always "weblogic"
+        adminUser: "weblogic"
+        adminPort: 9012
+        isAdminPortEnabled: false
+        rcuJdbcURL: 
+        rcuSysDBAUser: 
+        rcuPrefix: 
+        rcuRecreate: true
+        keyStoreType: 
+        keyStoreAlias: 
+        keyStoreIdentityFileName: 
+        keyStoreTrustFileName: 
+        authPolicyLoadInterval: 
+        isOPSS: true
+        serverStartMode: "prod"
+        brmDBHostName: 
+        brmDBPort: 
+        brmDBService:  
+        brmDBSID: 
+        brmDBSSL: false
+        brmDBUserName: 
+        brmDBWalletType: SSO
+        brmSourceWeblogicPort: 7001
+        brmSourceWeblogicSSL: true
+        pdcWeblogicHost: localhost
+        crossRefDBHostName: 
+        crossRefDBPort: 
+        crossRefDBService: 
+        crossRefDBSSL: false
+        crossRefDBUserName: 
+        crossRefDBWalletType: SSO
+        crossRefSchemaPDCTableSpace: 
+        crossRefSchemaTempTableSpace: 
+        crossRefSchemaUserName: 
+        migCrossRefDBPort: 
+        migCrossRefDBSSL: SSO
+        pdcAdminUser: 
+        pdcDBHostName: 
+        pdcDBPort: 
+        pdcDBService: 
+        pdcDBSSL: false
+        pdcDBUserName: 
+        pdcDBWalletType: SSO
+        pdcSchemaPDCTableSpace: 
+        pdcSchemaTempTableSpace: 
+        pdcSchemaUserName: 
+        pdcWeblogicHost: localhost
+        useExistingData: false
+        supportECE: true
+    secretEnv:
+        name: "pdc-secret-env"
+        adminPassword:  
+        rcuSysDBAPassword:  
+        rcuSchemaPassword:  
+        keyStoreIdentityKeyPass: 
+        keyStoreIdentityStorePass: 
+        keyStoreTrustStorePass: 
+        brmInfraPropertiesPassword: 
+        brmDBPassword: 
+        brmXrefDBAPassword: 
+        brmXrefSchemaPassword: 
+        brmIntegWalletPassword:  
+        pdcDBAPassword: 
+        pdcSchemaPassword: 
+        pdcWalletPassword: 
+        pdcAdminUserPassword: 
+    secretKeyStore:
+        name: "pdc-secret-keystores"
+    persistentVolClaim:
+        name: "pdc-pvc"
+    persistentVol:
+        name: "pdc-pv"
+        capacity: 25Mi
+        hostPath: 
+    storageClass:
+        name: "pdc-file-vol"
+    service:
+        name: "pdc"
+        type: "NodePort"
+
+ocboc:
+
+    boc:
+       labels:
+            # String used for forming names of Business Operations Center
+            # related resource
+            name: "boc"
+            version: "12.0.0.2.0"
+       deployment:
+            # Maximum time in seconds for a deployment to make progress before it is considered to be failed
+            deadlineSeconds: 1200
+            # The number of old ReplicaSets to retain to allow rollback
+            revisionHistLimit: 10
+             # Name of the boc image
+            imageName: "oracle/boc"
+            # Tag associated with image, generally, patch-set number
+            # For non-empty tag, ":" MUST be prepended
+            imageTag: ":12.0.0.2.0"
+            # Image pull policy. One of Always, Never, IfNotPresent
+            imagePullPolicy: IfNotPresent
+            probe:
+                # Configurations for readiness probe
+                ready:
+                    # Number of seconds after the container has started before probe is initiated
+                    delayInSec: 300
+                    # How often (in seconds) to perform the probe
+                    intervalInSec: 20
+                    # Minimum consecutive failures for the probe to be considered failed
+                    maxAttempts: 100
+            volMntKeyStore:
+                # Name of keystore volume; used only for mapping in YAML spec files
+                name: "boc-keystore-volume"
+                # Path within the container where keystores will appear
+                mountPath: "/u01/app/share/keystore"
+            volMntPolicy:
+                # Name of OPSS policy volume; used only for mapping in YAML spec files
+                name: "boc-policy-volume"
+                # Path within the container where policy file 'system-jazn-data.xml' will appear
+                mountPath: "/u01/app/share/policy"
+            volMntThirdparty:
+                # Name of BOC third party volume; used only for mapping in YAML spec files
+                name: "boc-thirdparty-volume"
+                # Path within the container where Thirdparty libraries will appear
+                mountPath: "/u01/app/share/Thirdparty"
+            volMntLib:
+                # Name of Lib volume containing OJDBC jar; used only for mapping in YAML spec files
+                name: "boc-lib-volume"
+                # Path within the container where OJDBC jar will appear
+                mountPath: "/u01/app/share/lib"
+            volMntLogs:
+                # Name of Logs volume; used only for mapping in YAML spec files
+                name: "boc-logs-volume"
+                # Path within the container where log files will appear
+                mountPath: "/u01/logs"
+       configEnv:
+            # Name of this configmap
+            name: "boc-configmap-env" 
+            # Components to install using the OUI Installer in a container
+            featureSets: "BusinessOperationCenter:12.0.0.2.0"
+            installType: "Custom"
+            # User who will be granted Administrator rights to WebLogic Domain
+            adminUser: "weblogic"
+            # Container's port for access to WebLogic Domain over Administration Port
+            adminPort: 9012
+            # Separate administration traffic from application traffic. One of true, false
+            isAdminPortEnabled: false
+            # Container's port for access to WebLogic Domain over HTTP
+            httpPort: 7011
+            # Enable SSL in WebLogic Domain. One of true, false
+            isSSLEnabled: true 
+            # Container's port for access to WebLogic Domain over HTTPS
+            httpsPort: 7012             
+            # Mode to use when starting the server. One of dev, prod
+            serverStartMode: "prod"
+            # File name of the Identity Keystore
+            keyStoreIdentityFileName: "identity.jks"
+            # File type of SSL Identity and Trust store
+            keyStoreType: "JKS"
+            # File name of the Trust Keystore
+            keyStoreTrustFileName: "trust.jks"
+            # Private Key Alias of the keystore
+            keyStoreAlias: "cloudstore"
+            # Server in WebLogic domain where application must be deployed
+            targetServer: "AdminServer"
+            # Create an OPSS or non-OPSS domain. One of true, false
+            # Production setup must use OPSS (true) only
+            isOPSS: true
+            # Database connection details where OPSS schema will be created
+            rcuJdbcURL: "__DB_HOST:DB_PORT/DB_SERVICE_NAME__"
+            # Database adminstrator user name
+            rcuSysDBAUser: "sys"
+            # Prefix for schemas of OPSS
+            rcuPrefix: "BOCJRF11"
+            # Drops existing OPSS schema already exists if true. One of true, false
+            rcuRecreate: true
+            # How often (in seconds) to check if new authorization policy is available and load
+            # Value of '0' means run it only once during the container startup.
+            authPolicyLoadInterval: 60
+            # Distinguished Name to connect to the LDAP server
+            ldapAdmin: "cn=Directory Manager"
+            # Name for the OAM Identity Asserter
+            ldapAsserterName: "OAMIdentityAsserter"
+            # Base DN of the tree in LDAP directory that contains groups
+            # Example: cn=Groups,dc=example,dc=com
+            ldapGroupBase: "__GROUP_BASE__"
+            # Host name or IP address of the LDAP server
+            ldapHost: "__LDAP_HOST__"
+            # Port number on which the LDAP server is listening
+            ldapPort: 389
+            # Name of iPlanet Authentication provider
+            ldapProviderName: "OUDAuthenticator"
+            # Skip creation of Authenticator and Asserter. One of true, false
+            ldapSkip: false
+            # Base DN of the tree in LDAP directory that contains users
+            # Example: cn=Users,dc=example,dc=com
+            ldapUserBase: "__USER_BASE__"
+            #BRM DB host name
+            dbHostName: "__BRM_DB_HOSTNAME__"
+            #BRM DB port
+            dbPort: 1521
+            #The database service name.
+            sysDBAlias: "__SYS_DB_ALIAS__"
+            #The user name of a database administrator.
+            sysUserName: "sys"
+            #The BRM database schema user name.
+            brmSchemaUserName: "__BRM_SCHEMA_USERNAME__"
+            #The user name of your Business Operations Center database administrator.
+            bocSchemaUserName: "__BOC_SCHEMA_USERNAME__"
+            #The default tablespace for the Business Operations Center database administrator.
+            bocSchemaBocTablespace: "__BOC_SCHEMA_DEFAULT_TABLESPACE__"
+            #The temp tablespace for the database Business Operations Center administrator.
+            bocSchemaTempTablespace: "__BOC_SCHEMA_TEMP_TABLESPACE__"
+            #URL of the Oracle Communications Billing Care instance configured for use with your BRM Server if installed. Leave blank if Billing Care is not installed in your environment.
+            billingCareUrl: "__BILLING_CARE_URL__"
+            #Redirect URL where Business Operations Center sends a user after logout and session termination.
+            logoutUrl: "login.html"
+            #Number of session idle seconds before Business Operations Center displays a timeout warning to a user (default value is 90 seconds).
+            timeoutWaringDuration: "16000"
+            # Login name of service having permissions to access BRM
+            brmRootLogin: "root.0.0.0.1"
+            # Poid Id of service having permissions to access BRM
+            brmServicePoidId: 2
+            # Poid Type of service having permissions to access BRM
+            brmServiceType: "/service/admin_client"
+            #Time Zone (TZ) value of the server operating system on which the BRM is running.
+            brmServerTimeZone: "__BRM_SERVER_TIMEZONE__"
+            pageSize: 25
+            refreshInterval: 28800000
+            connectionTimeout: 16000
+            #To create datasouce to connect to BOC DB.
+            # DB URL can be "__DB_HOST:DB_PORT/DB_SERVICE_NAME__" or "__DB_HOST:DB_PORT:DB_SERVICE_ID__"
+            bocdbURL: "__DB_HOST:DB_PORT/DB_SERVICE_NAME__"
+            # To consider pin_virtual_time for Job execution
+            enablePvt: true
+            # JavaPCM Log Level. One of 1(Error), 2(Warning), 3(Debug)
+            infranetLogLevel: 2
+       secretEnv:
+            # Name of this secret
+            name: "boc-secret-env"
+            # Password of the WebLogic Domain's administrative user (configEnv.adminUser)
+            adminPassword: 
+            #The database administrator's password.
+            sysDBAPassword:         
+            #The BRM database schema user password.            
+            brmSchemaPassword: 
+            #The Business Operations Center database administrator password.
+            bocSchemaPassword:             
+            # Password to wallet storing sensitive data for BRM connection
+            walletPassword:
+            # Password of the Ldap Server Admin User (configEnv.ldapAdmin)            
+            ldapPassword: 
+            # Password of the Database Administrator (configEnv.rcuSysDBAUser)
+            rcuSysDBAPassword: 
+            # Password of the OPSS schema (configEnv.rcuPrefix)
+            rcuSchemaPassword: 
+            # KeyPass of Identity Keystore
+            keyStoreIdentityKeyPass: 
+            # StorePass of Identity Keystore
+            keyStoreIdentityStorePass: 
+            # StorePass of Trust Keystore
+            keyStoreTrustStorePass: 
+       secretKeyStore:
+            # A Secret object for keystore files
+            # Name of this secret
+            name: "boc-secret-keystores"
+       persistentVolClaimOpssPolicy:
+            # Name of PersistentVolumeClaim for 'system-jazn-data.xml' authorization policy
+            name: "boc-opss-policy-pvc"
+       persistentVolOpssPolicy:
+            # Name of PersistentVolume for 'system-jazn-data.xml' authorization policy
+            name: "boc-opss-policy-pv"
+            capacity: 50Mi
+            # Location on HOST system which will map to volMntPolicy.mountPath
+            hostPath: "__VOLUME_LOCATION_ON_HOST__"
+       storageClassOpssPolicy:
+            name: "boc-opss-policy-file-vol"
+       persistentVolClaimThirdparty:
+            # Name of PersistentVolumeClaim for Thirdparty libraries
+            name: "boc-thirdparty-pvc"
+       persistentVolThirdparty:
+            # Name of PersistentVolume for Thirdparty libraries
+            name: "boc-thirdparty-pv"
+            capacity: 50Mi
+            # Location on HOST system which will map to volMntThirdparty.mountPath
+            hostPath: "__VOLUME_LOCATION_ON_HOST__"
+       storageClassThirdparty:
+            name: "boc-thirdparty-file-vol"
+       persistentVolClaimLib:
+            # Name of PersistentVolumeClaim for
+            name: "boc-lib-pvc"
+       persistentVolLib:
+            # Name of PersistentVolume for Lib
+            name: "boc-lib-pv"
+            capacity: 50Mi
+            # Location on HOST system which will map to volMntLib.mountPath 
+            hostPath: "__VOLUME_LOCATION_ON_HOST__"
+       storageClassLib:
+            name: "boc-lib-file-vol"
+       service:
+            # Name of the Service Object
+            name: "boc"
+            # Type of the service
+            # NodePort allows access to application from outside
+            type: "NodePort"
+ocbc:
+
+    bc:
+        labels:
+            # String used for forming names of billing care
+            # related resources
+            name: billingcare
+            version: 12.0.0.2.0
+        deployment:
+            # Set "true" if image belongs to billing care SDK
+            isSDK: false
+            # Maximum time in seconds for a deployment to make progress before it is considered to be failed
+            deadlineSeconds: 1200
+            # The number of old ReplicaSets to retain to allow rollback
+            revisionHistLimit: 10
+            # Name of the billingcare image
+            imageName: oracle/billingcare
+            # Tag associated with image, generally, patch-set number
+            # For non-empty tag, ":" MUST be prepended
+            imageTag: :12.0.0.2.0
+            # Image pull policy. One of Always, Never, IfNotPresent
+            imagePullPolicy: IfNotPresent
+            probe:
+                # Configurations for readiness probe
+                ready:
+                    # Number of seconds after the container has started before probe is initiated
+                    delayInSec: 200
+                    # How often (in seconds) to perform the probe 
+                    intervalInSec: 10
+                    # Minimum consecutive failures for the probe to be considered failed
+                    maxAttempts: 100
+            volMntKeyStore:
+                # Name of keystore volume; used only for mapping in YAML spec files
+                name: billingcare-keystore-volume
+                # Path within the container where keystores will appear
+                mountPath: /u01/app/share/keystore
+            volMntPolicy:
+                # Name of keystore volume; used only for mapping in YAML spec files
+                name: billingcare-policy-volume
+                # Path within the container where policy file 'system-jazn-data.xml' will appear
+                mountPath: /u01/app/share/policy
+            volMntBatchPymt:
+                # Name of keystore volume; used only for mapping in YAML spec files
+                name: billingcare-batchpymt-volume
+                # Path within the container where batch payment files will appear
+                mountPath: /u01/app/lockbox
+            volMntLogs:
+                # Name of keystore volume; used only for mapping in YAML spec files
+                name: billingcare-logs-volume
+                # Path within the container where log files will appear
+                mountPath: /u01/logs
+            volMntDeployPlan:
+                # Name of keystore volume; used only for mapping in YAML spec files
+                name: billingcare-sdk-plan-volume
+                # Path within the container where deployment plan xml will appear
+                mountPath: /u01/app/sdk_plan
+        configEnv:
+            # Name of this configmap
+            name: billingcare-configmap-env
+            # Container's port for access to WebLogic Domain over HTTP
+            httpPort: 7011
+            # Container's port for access to WebLogic Domain over HTTPS
+            httpsPort: 7012
+            # Enable SSL in WebLogic Domain. One of true, false
+            isSSLEnabled: true
+            # File type of SSL Identity and Trust store
+            keyStoreType: JKS
+            # Private Key Alias of the keystore
+            keyStoreAlias: __KEYSTORE_ALIAS__
+            # File name of the Identity Keystore
+            keyStoreIdentityFileName: identity.jks
+            # File name of the Trust Keystore
+            keyStoreTrustFileName: trust.jks
+            # Mode to use when starting the server. One of dev, prod
+            serverStartMode: prod
+            # User who will be granted Administrator rights to WebLogic Domain
+            adminUser: weblogic
+            # Container's port for access to WebLogic Domain over Administration Port
+            adminPort: 9012
+            # Separate administration traffic from application traffic. One of true, false
+            isAdminPortEnabled: false
+            # Database connection details where OPSS schema will be created
+            rcuJdbcURL: __DB_HOST__:__DB_PORT__/__DB_SERVICE_NAME__
+            # Database adminstrator user name
+            rcuSysDBAUser: sys
+            # Prefix for schemas of OPSS
+            rcuPrefix: BCJRF12
+            # Drops existing OPSS schema already exists if true. One of true, false
+            rcuRecreate: true
+            # Create an OPSS or non-OPSS domain. One of true, false
+            # Production setup must use OPSS (true) only
+            isOPSS: true
+            # Components to install using the OUI Installer in a container
+            featureSets: BillingCare:12.0.0.2.0
+            installType: BillingCareApp
+            # Skip creation of Authenticator and Asserter. One of true, false
+            ldapSkip: false
+            # Distinguished Name to connect to the LDAP server
+            ldapAdmin: cn=Directory Manager
+            # Host name or IP address of the LDAP server
+            ldapHost: __LDAP_HOST__
+            # Port number on which the LDAP server is listening
+            ldapPort: 389
+            # Base DN of the tree in LDAP directory that contains groups
+            # Example: cn=Groups,dc=example,dc=com
+            ldapGroupBase: __GROUP_BASE__
+            # Base DN of the tree in LDAP directory that contains users
+            # Example: cn=Users,dc=example,dc=com
+            ldapUserBase: __USER_BASE__
+            # Name of iPlanet Authentication provider
+            ldapProviderName: OUDAuthenticator
+            # Name for the OAM Identity Asserter
+            ldapAsserterName: OAMIdentityAsserter
+            # Poid Id of service having permissions to access BRM
+            brmServicePoidId: 2
+            # Poid Type of service having permissions to access BRM
+            brmServiceType: /service/admin_client
+            # Login name of service having permissions to access BRM
+            brmRootLogin: root.0.0.0.1
+            # Name of directory where batch payment files will be kept
+            # Full path = volMntBatchPymt.mountPath + '/' + this directory name
+            batchPymtFiles: batch_pymt_files
+            # Name of directory where templates of batch payment will be copied
+            # Full path = volMntBatchPymt.mountPath + '/' + this directory name
+            batchPymtTemplates: batch_pymt_templates
+            # Server in WebLogic domain where application must be deployed
+            targetServer: AdminServer
+            # URL to BIP Server
+            # Example: http://__HOST__:__PORT__/xmlpserver/services/PublicReportService_v11
+            bipUrl: __BIP_URL__
+            # Name of user with access to BIP instance
+            bipUserId: __BIP_USER_ID__
+            # How often (in seconds) to check if new authorization policy is available and load
+            # Value of '0' means run it only once during the container startup.
+            authPolicyLoadInterval: 60
+            # JavaPCM Log Level. One of 1(Error), 2(Warning), 3(Debug)
+            infranetLogLevel: 2
+        configEnvSDK:
+            # Environment setup for SDK deployment
+            # Name of this configmap
+            name: billingcare-sdk-configmap-env
+            # Name of SDK to appear in deployment list
+            deployName: BillingCareCustomizations
+            # Name of deployment plan linking SDK with Billing Care application
+            planFileName: Plan.xml
+        configPlanSDK:
+            # Deployment Plan which links SDK with Billing Care application
+            # Name of this configmap
+            name: billingcare-sdk-configmap-plan
+        secretEnv:
+            # Name of this secret
+            name: billingcare-secret-env
+            # Password of the WebLogic Domain's administrative user (configEnv.adminUser)
+            adminPassword:
+            # Password of the Ldap Server Admin User (configEnv.ldapAdmin)
+            ldapPassword:
+            # Password to wallet storing sensitive data for BRM connection
+            walletPassword:
+            # Password of the BIP Instance (configEnv.bipUserId)
+            bipPassword:
+            # Password of the Database Administrator (configEnv.rcuSysDBAUser)
+            rcuSysDBAPassword:
+            # Password of the OPSS schema (configEnv.rcuPrefix)
+            rcuSchemaPassword:
+            # KeyPass of Identity Keystore
+            keyStoreIdentityKeyPass:
+            # StorePass of Identity Keystore
+            keyStoreIdentityStorePass:
+            # StorePass of Trust Keystore
+            keyStoreTrustStorePass:
+        secretKeyStore:
+            # A Secret object for keystore files
+            # Name of this secret
+            name: billingcare-secret-keystores
+        pvcPolicy:
+            # Name of PersistentVolumeClaim for 'system-jazn-data.xml' authorization policy
+            name: billingcare-pvc-policy
+        pvPolicy:
+            # Name of PersistentVolume for 'system-jazn-data.xml' authorization policy
+            name: billingcare-pv-policy
+            capacity: 5Mi
+            # Location on HOST system which will map to volMntPolicy.mountPath
+            hostPath: __VOLUME_LOCATION_ON_HOST__
+        pvcBatchPymt:
+            # Name of PersistentVolumeClaim for batch payment files
+            name: billingcare-pvc-batchpymt
+        pvBatchPymt:
+            # Name of PersistentVolume for batch payment files
+            name: billingcare-pv-batchpymt
+            capacity: 50Mi
+            # Location on HOST system which will map to volMntBatchPymt.mountPath
+            hostPath: __VOLUME_LOCATION_ON_HOST__
+        storageClass:
+            name: billingcare-file-vol
+        service:
+            # Name of the Service Object
+            name: billingcare
+            # Type of the service
+            # NodePort allows access to application from outside
+            type: NodePort

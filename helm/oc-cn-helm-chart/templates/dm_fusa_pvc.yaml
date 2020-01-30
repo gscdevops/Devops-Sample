@@ -1,0 +1,13 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+ name: {{ .Values.ocbrm.dm_fusa.tempdir.pvc }}
+ labels:
+   application: {{ .Chart.Name }}
+spec:
+ storageClassName: {{ .Values.ocbrm.storage_class.name }}
+ accessModes:
+   - ReadWriteMany
+ resources:
+   requests:
+     storage: {{ .Values.ocbrm.dm_fusa.tempdir.storage }}

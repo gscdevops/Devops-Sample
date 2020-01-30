@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: {{ .Values.ocpdc.service.name }}
+    namespace: {{ .Release.Namespace }}
+    label:
+        app.kubernetes.io/name: {{ .Values.ocpdc.labels.name }}
+        app.kubernetes.io/version: {{ .Values.ocpdc.labels.version }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+    selector:
+        app.kubernetes.io/name: {{ .Values.ocpdc.labels.name }}
+    ports:
+    -   name: ocpdc-port-http
+        port: {{ .Values.ocpdc.configEnv.httpPort }}
+        protocol: TCP
+    -   name: ocpdc-port-https
+        port: {{ .Values.ocpdc.configEnv.httpsPort }}
+        protocol: TCP
+    {{if (gt ( .Values.ocpdc.configEnv.t3ChannelPort | int ) 0)}}
+    -   name: ocpdc-port-t3-channel
+        port: {{ .Values.ocpdc.configEnv.t3ChannelPort }}
+        targetPort: {{ .Values.ocpdc.configEnv.t3ChannelPort }}
+        nodePort: {{ .Values.ocpdc.configEnv.t3ChannelPort }}
+        protocol: TCP    
+    {{- end }}
+    {{if (gt ( .Values.ocpdc.configEnv.t3sChannelPort | int ) 0)}}
+    -   name: ocpdc-port-t3s-channel
+        port: {{ .Values.ocpdc.configEnv.t3sChannelPort }}
+        targetPort: {{ .Values.ocpdc.configEnv.t3sChannelPort }}
+        nodePort: {{ .Values.ocpdc.configEnv.t3sChannelPort }}
+        protocol: TCP             
+    {{- end }}
+    type: {{ .Values.ocpdc.service.type }}

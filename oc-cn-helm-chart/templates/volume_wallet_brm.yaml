@@ -1,0 +1,38 @@
+{{- if eq .Values.ocbrm.existing_database true }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+ name: {{ .Values.ocbrm.wallet.pvc }}
+ namespace: {{ .Release.Namespace }}
+ labels:
+   application: {{ .Chart.Name }}
+spec:
+ storageClassName: {{ .Values.ocbrm.storage_class.name }}
+ accessModes:
+   - ReadWriteMany
+ resources:
+   requests:
+     storage: {{ .Values.ocbrm.wallet.storage }}
+ volumeName: {{ .Values.ocbrm.wallet.pv }}
+
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+ name: {{ .Values.ocbrm.wallet.pv }}
+ namespace: {{ .Release.Namespace }}
+ labels:
+    application: {{ .Chart.Name }}
+spec:
+ storageClassName: {{ .Values.ocbrm.storage_class.name }}
+ capacity:
+    storage: {{ .Values.ocbrm.wallet.storage }}
+ accessModes:
+    - ReadWriteMany
+ claimRef:
+    namespace: {{ .Release.Namespace }}
+    name: {{ .Values.ocbrm.wallet.pvc }}
+ hostPath:
+    path: "{{ .Values.ocbrm.existing_wallet }}"
+{{- end }}

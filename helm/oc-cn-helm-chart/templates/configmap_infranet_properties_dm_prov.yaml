@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dm-prov-simulator-infranet-properties-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+      application: {{ .Chart.Name }}
+data:
+  Infranet.properties: |
+
+
+    infranet.login.type=1
+
+    # log all msgs
+    infranet.log.level={{ .Values.ocbrm.LOG_LEVEL }}
+
+    infranet.log.logallebuf=true
+
+    ########################################################
+    SSL configuration
+    ########################################################
+    # To  enable SSL, make sure to provide correct values for below config entries. e.g wallet location and filename etc.
+    infranet.pcp.ssl.enabled = {{ .Values.ocbrm.isSSLEnabled }}
+    # Oracle wallet location
+    infranet.pcp.ssl.wallet.location=/oms/wallet/server
+    infranet.pcp.ssl.wallet.filename = cwallet.sso

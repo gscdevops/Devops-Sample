@@ -1,0 +1,170 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{ .Values.ocboc.boc.labels.name }}-deployment
+    namespace: {{ .Release.Namespace }} 
+    labels:
+        app.kubernetes.io/name: {{ .Values.ocboc.boc.labels.name }}
+        app.kubernetes.io/version: {{ .Values.ocboc.boc.labels.version }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+    minReadySeconds: 0
+    paused: false
+    progressDeadlineSeconds: {{ .Values.ocboc.boc.deployment.deadlineSeconds }}
+    replicas: 1
+    revisionHistoryLimit: {{ .Values.ocboc.boc.deployment.revisionHistLimit }}
+    selector: 
+        matchLabels:
+            app.kubernetes.io/name: {{ .Values.ocboc.boc.labels.name }}
+    strategy: 
+        type: Recreate
+    template:
+        metadata:
+            labels: 
+                app.kubernetes.io/name: {{ .Values.ocboc.boc.labels.name }}
+                app.kubernetes.io/version: {{ .Values.ocboc.boc.labels.version }}
+                app.kubernetes.io/managed-by: {{ .Release.Service }}
+        spec:
+            containers:
+            -   name: {{ .Values.ocboc.boc.labels.name }}-cont
+                image: {{ .Values.imageRepository }}{{ .Values.ocboc.boc.deployment.imageName }}{{ .Values.ocboc.boc.deployment.imageTag }}
+                imagePullPolicy: {{ .Values.ocboc.boc.deployment.imagePullPolicy }}
+                readinessProbe:
+                    exec:
+                        command: ["cat", "/u01/oracle/container_is_ready"]
+                    failureThreshold: {{ .Values.ocboc.boc.deployment.probe.ready.maxAttempts }}
+                    initialDelaySeconds: {{ .Values.ocboc.boc.deployment.probe.ready.delayInSec }}
+                    periodSeconds: {{ .Values.ocboc.boc.deployment.probe.ready.intervalInSec }}
+                ports:
+                {{- if eq .Values.ocboc.boc.configEnv.isSSLEnabled true }}
+                -   name: boc-port-https
+                    containerPort: {{ .Values.ocboc.boc.configEnv.httpsPort }}
+                    {{- if eq .Values.ocboc.boc.configEnv.isAdminPortEnabled true }}
+                -   name: boc-port-admin
+                    containerPort: {{ .Values.ocboc.boc.configEnv.adminPort }}
+                    {{- end }}
+                {{- else }}
+                -   name: boc-port-http
+                    containerPort: {{ .Values.ocboc.boc.configEnv.httpPort }}
+                {{- end }}
+                envFrom:
+                -   configMapRef:
+                        name: {{ .Values.ocboc.boc.configEnv.name }}
+                -   secretRef:
+                        name: {{ .Values.ocboc.boc.secretEnv.name }}
+                env:
+                - name: INIT_DB
+                  value: "{{ .Values.ocbrm.init_database }}"
+                - name: OLD_CLIENT
+                  valueFrom:
+                     secretKeyRef:
+                       name: oms-schema-password
+                       key: old_client
+                - name: OLD_ROOT
+                  valueFrom:
+                     secretKeyRef:
+                       name: oms-schema-password
+                       key: old_root
+                -   name: CM_SERVICE_HOST
+                    valueFrom:
+                       configMapKeyRef:
+                         name: oms-common-config
+                         key: CM_SERVICE_HOST
+                -   name: CM_SERVICE_PORT
+                    valueFrom:
+                       configMapKeyRef:
+                         name: oms-common-config
+                         key: CM_SERVICE_PORT
+                -   name: ENABLE_SSL
+                    valueFrom:
+                       configMapKeyRef:
+                         name: oms-common-config
+                         key: ENABLE_SSL
+                -   name: VIRTUAL_TIME_ENABLED
+                    valueFrom:
+                       configMapKeyRef:
+                         name: oms-common-config
+                         key: VIRTUAL_TIME_ENABLED
+                -   name: CLIENT_WALLET_PASSWORD
+                    valueFrom:
+                      secretKeyRef:
+                        name: oms-schema-password
+                        key: client_wallet_password
+                -   name: OMS_SCHEMA_USERNAME
+                    valueFrom:
+                      configMapKeyRef:
+                        name: oms-common-config
+                        key: OMS_SCHEMA_USERNAME
+                -   name: OMS_SCHEMA_PASSWORD
+                    valueFrom:
+                      secretKeyRef:
+                        name: oms-schema-password
+                        key: oms_schema_password
+                -   name: OMS_DB_ALIAS
+                    valueFrom:
+                      configMapKeyRef:
+                        name: oms-common-config
+                        key: OMS_DB_ALIAS
+                -   name: BRM_ROOT_PASSWORD
+                    valueFrom:
+                      secretKeyRef:
+                        name: oms-schema-password
+                        key: brm_root_password
+                -   name: ROOT_WALLET_PASSWORD
+                    valueFrom:
+                      secretKeyRef:
+                        name: oms-schema-password
+                        key: root_wallet_password
+                -   name: SERVER_WALLET_PASSWORD
+                    valueFrom:
+                      secretKeyRef:
+                        name: oms-schema-password
+                        key: server_wallet_password
+                -   name: SHARED_VIRTUAL_TIME_FILE
+                    value: {{ .Values.ocbrm.virtual_time.pvt }}/pin_virtual_time_file
+                volumeMounts:
+                -   name: {{ .Values.ocboc.boc.deployment.volMntKeyStore.name }}
+                    mountPath: {{ .Values.ocboc.boc.deployment.volMntKeyStore.mountPath }}
+                -   name: {{ .Values.ocboc.boc.deployment.volMntPolicy.name }}
+                    mountPath: {{ .Values.ocboc.boc.deployment.volMntPolicy.mountPath }}
+                -   name: {{ .Values.ocboc.boc.deployment.volMntThirdparty.name }}
+                    mountPath: {{ .Values.ocboc.boc.deployment.volMntThirdparty.mountPath }}
+                -   name: {{ .Values.ocboc.boc.deployment.volMntLib.name }}
+                    mountPath: {{ .Values.ocboc.boc.deployment.volMntLib.mountPath }}
+                -   name: {{ .Values.ocboc.boc.deployment.volMntLogs.name }}
+                    mountPath: {{ .Values.ocboc.boc.deployment.volMntLogs.mountPath }}
+                -   name: virtual-time-volume
+                    mountPath: {{ .Values.ocbrm.virtual_time.pvt }}
+                -   name: pin-conf-config-brm-apps-volume-1
+                    mountPath: /oms/pin_confs1
+                -   name: pin-conf-config-brm-apps-volume-2
+                    mountPath: /oms/pin_confs2
+                -   name: infranet-properties-brm-apps-volume
+                    mountPath: /oms/infranets
+            volumes:
+            -   name: {{ .Values.ocboc.boc.deployment.volMntKeyStore.name }}
+                secret:
+                    secretName: {{ .Values.ocboc.boc.secretKeyStore.name }}
+            -   name: {{ .Values.ocboc.boc.deployment.volMntPolicy.name }}
+                persistentVolumeClaim:
+                    claimName: {{ .Values.ocboc.boc.persistentVolClaimOpssPolicy.name }}
+            -   name: {{ .Values.ocboc.boc.deployment.volMntThirdparty.name }}
+                persistentVolumeClaim:
+                    claimName: {{ .Values.ocboc.boc.persistentVolClaimThirdparty.name }}
+            -   name: {{ .Values.ocboc.boc.deployment.volMntLib.name }}
+                persistentVolumeClaim:
+                    claimName: {{ .Values.ocboc.boc.persistentVolClaimLib.name }}
+            -   name: {{ .Values.ocboc.boc.deployment.volMntLogs.name }}
+                emptyDir: {}
+            -   name: virtual-time-volume
+                persistentVolumeClaim:
+                  claimName: {{ .Values.ocbrm.virtual_time.pvc }}
+            -   name: pin-conf-config-brm-apps-volume-1
+                configMap:
+                  name: pin-conf-config-brm-apps-1                  
+            -   name:  pin-conf-config-brm-apps-volume-2
+                configMap:
+                  name:  pin-conf-config-brm-apps-2                     
+            -   name: infranet-properties-brm-apps-volume
+                configMap:
+                  name: infranet-properties-brm-apps

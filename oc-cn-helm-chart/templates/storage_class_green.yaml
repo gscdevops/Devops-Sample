@@ -1,0 +1,7 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: {{ .Values.ocbrm.storage_class.name }}
+provisioner: {{ .Values.ocbrm.storage_class.provisioner }}
+parameters:
+  mountOptions: "{{ .Values.ocbrm.storage_class.mountOptions }}"  # TODO: reconcile with StorageClass.mountOptions

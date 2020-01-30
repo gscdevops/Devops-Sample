@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.ocbc.bc.configPlanSDK.name }}
+  namespace: {{ .Release.Namespace }}
+data:
+  Plan.xml: |
+    <?xml version='1.0' encoding='UTF-8'?>
+    <deployment-plan xmlns="http://xmlns.oracle.com/weblogic/deployment-plan" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.oracle.com/weblogic/deployment-plan http://xmlns.oracle.com/weblogic/deployment-plan/1.0/deployment-plan.xsd" global-variables="false">
+        <application-name>BillingCare.war</application-name>
+        <variable-definition>
+            <variable>
+                <name>CONFIG_SSL_REDIRECT</name>
+                <value>CONFIDENTIAL</value>
+            </variable>
+            <variable>
+                <name>BATCH_PAYMENT_FILES_PATH</name>
+                <value>{{ .Values.ocbc.bc.deployment.volMntBatchPymt.mountPath }}/{{ .Values.ocbc.bc.configEnv.batchPymtFiles }}</value>
+            </variable>
+            <variable>
+                <name>BATCH_PAYMENT_TEMPLATES_PATH</name>
+                <value>{{ .Values.ocbc.bc.deployment.volMntBatchPymt.mountPath }}/{{ .Values.ocbc.bc.configEnv.batchPymtTemplates }}</value>
+            </variable>
+          <variable>
+             <name>SDKLibraryName</name>
+             <value>{{ .Values.ocbc.bc.configEnvSDK.deployName }}</value>
+          </variable>
+        </variable-definition>
+        <module-override>
+            <module-name>BillingCare.war</module-name>
+            <module-type>war</module-type>
+            <module-descriptor external="true">
+                <root-element>web-app</root-element>
+                <uri>WEB-INF/web.xml</uri>
+                <variable-assignment>
+                    <name>CONFIG_SSL_REDIRECT</name>
+                    <xpath>/web-app/security-constraint/user-data-constraint/transport-guarantee</xpath>
+                </variable-assignment>
+                <variable-assignment>
+                    <name>BATCH_PAYMENT_FILES_PATH</name>
+                    <xpath>/web-app/context-param/[param-name="BATCH_PAYMENT_FILES_PATH"]/param-value</xpath>
+                    <operation>replace</operation>
+                </variable-assignment>
+                <variable-assignment>
+                    <name>BATCH_PAYMENT_TEMPLATES_PATH</name>
+                    <xpath>/web-app/context-param/[param-name="BATCH_PAYMENT_TEMPLATES_PATH"]/param-value</xpath>
+                    <operation>replace</operation>
+                </variable-assignment>
+            </module-descriptor>
+            <module-descriptor external="true">
+                <root-element>weblogic-web-app</root-element>
+                <uri>WEB-INF/weblogic.xml</uri>
+                <variable-assignment>
+                    <name>SDKLibraryName</name>
+                    <xpath>/weblogic-web-app/library-ref/library-name</xpath>
+                    <operation>add</operation>
+                </variable-assignment>
+            </module-descriptor>
+        </module-override>
+    </deployment-plan>

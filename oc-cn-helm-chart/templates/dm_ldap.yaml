@@ -1,0 +1,174 @@
+---
+### Deployment Descriptor
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dm-ldap
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.ocbrm.dm_ldap.deployment.replicaCount }}
+  selector:
+    matchLabels:
+      application: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        application: {{ .Chart.Name }}
+        component: oms-dm-ldap
+      name: dm-ldap
+    spec:
+      containers:
+      - name: dm-ldap
+        image: "{{ .Values.imageRepository }}{{ .Values.ocbrm.dm_ldap.deployment.imageName }}:{{ .Values.ocbrm.dm_ldap.deployment.imageTag }}"
+        {{- if eq .Values.ocbrm.virtual_time.enabled true }}
+        command: ["/bin/sh"]
+        args: ["-c", "sleep 10;/oms/entrypoint.sh dm_ldap"]
+        {{- end }}
+        ports:
+          - name: dm-pcp-port
+            containerPort: {{ .Values.ocbrm.dm_ldap.deployment.port }}
+        env:
+        - name: INIT_DB
+          value: "{{ .Values.ocbrm.init_database }}"
+        - name: TZ
+          value: "{{ .Values.ocbrm.TZ }}"
+        - name: PIN_LOG_DIR
+          value: "{{ .Values.ocbrm.logDir }}"
+        - name: DM_LDAP_DIRECTORY_SERVER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: oms-schema-password
+              key: ldap_server_password
+        - name: DM_LDAP_DN_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: oms-common-config
+              key: DM_LDAP_DN_NAME
+        - name: DM_LDAP_DIRECTORY_SERVER_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: oms-common-config
+              key: DM_LDAP_DIRECTORY_SERVER_PORT
+        - name: DM_LDAP_DIRECTORY_SERVER
+          valueFrom:
+            configMapKeyRef:
+              name: oms-common-config
+              key: DM_LDAP_DIRECTORY_SERVER
+        - name: SERVICE_FQDN
+          valueFrom:
+            configMapKeyRef:
+              name: oms-common-config
+              key: DM_LDAP_SERVICE_HOST
+        - name: CLIENT_WALLET_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: oms-schema-password
+              key: client_wallet_password
+        - name: OLD_ROOT
+          valueFrom:
+            secretKeyRef:
+              name: oms-schema-password
+              key: old_root
+        - name: OLD_CLIENT
+          valueFrom:
+            secretKeyRef:
+              name: oms-schema-password
+              key: old_client
+        - name: ROOT_WALLET_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: oms-schema-password
+              key: root_wallet_password
+        - name: SERVER_WALLET_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: oms-schema-password
+              key: server_wallet_password
+        - name: ENABLE_SSL
+          valueFrom:
+            configMapKeyRef:
+              name: oms-common-config
+              key: ENABLE_SSL
+        - name: DM_LDAP_SERVICE_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: oms-common-config
+              key: DM_LDAP_SERVICE_HOST
+        - name: DM_LDAP_SERVICE_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: oms-common-config
+              key: DM_LDAP_SERVICE_PORT
+        - name: VIRTUAL_TIME_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: oms-common-config
+              key: VIRTUAL_TIME_ENABLED
+        - name: VIRTUAL_TIME_SETTING
+          valueFrom:
+            configMapKeyRef:
+              name: oms-common-config
+              key: VIRTUAL_TIME_SETTING
+        - name: SHARED_VIRTUAL_TIME_FILE
+          value: {{ .Values.ocbrm.virtual_time.pvt }}/pin_virtual_time_file
+        imagePullPolicy: {{ .Values.ocbrm.imagePullPolicy }}
+        terminationMessagePolicy: FallbackToLogsOnError
+        volumeMounts:
+        - name: dm-ldap-pin-config-volume
+          mountPath: /oms/pin.conf.tmpl
+          subPath: pin.conf
+        - name: dm-ldap-mapping-config-volume
+          mountPath: /oms/sys/dm_ldap/ldap.idl
+          subPath: ldap.idl
+        - name: oms-logs
+          mountPath: {{ .Values.ocbrm.logDir }}
+        - name: virtual-time-volume
+          mountPath: {{ .Values.ocbrm.virtual_time.pvt }}
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - netstat -anp | grep LISTEN | grep {{ .Values.ocbrm.dm_ldap.deployment.port }} | grep dm
+          initialDelaySeconds: 120
+          periodSeconds: 20
+          failureThreshold: 5
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - netstat -anp | grep LISTEN | grep {{ .Values.ocbrm.dm_ldap.deployment.port }} | grep dm
+          initialDelaySeconds: 120
+          periodSeconds: 40
+          timeoutSeconds: 1
+      hostname: dm-ldap
+      dnsPolicy: ClusterFirst
+      volumes:
+      - name: dm-ldap-pin-config-volume
+        configMap:
+          name: dm-ldap-pin-conf-config
+      - name: dm-ldap-mapping-config-volume
+        configMap:
+          name: dm-ldap-pin-conf-config
+      - name: oms-logs
+        emptyDir: {}
+      - name: virtual-time-volume
+        persistentVolumeClaim: 
+          claimName: virtual-time
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: dm-ldap
+  namespace: {{ .Release.Namespace }}
+  labels:
+    application: {{ .Chart.Name }}
+spec:
+  selector:
+    component: oms-dm-ldap
+  ports:
+  - name: dm-pcp-port
+    port: {{ .Values.ocbrm.dm_ldap.deployment.port }}
+    protocol: TCP
+  type: {{ .Values.ocbrm.dm_ldap.service.type }}

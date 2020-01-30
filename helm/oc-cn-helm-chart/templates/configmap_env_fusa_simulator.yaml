@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fusa-sim-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    application: {{ .Chart.Name }}
+data:
+  FUSA_ANS_S_AVS: I3
+  FUSA_ANS_B_DROP_LINE: "0"
+  FUSA_ANS_B_NO_RESPONSE: "0"
+  FUSA_ANS_B_V_CODE: "100"
+  FUSA_ANS_S_S_CODE: P
+  FUSA_ANS_S_V_CODE: "100"
+  FUSA_SIMULATION_LEVEL: "0"
+  FUSA_SIM_WAIT: "601"
+  FUSA_SIM_S_LOGLEVEL: "3"
+  FUSA_SIM_B_LOGLEVEL: "3"
+  ANSWER_TLS_ENABLED: "1"
+  SERVICE_FQDN: fusa-simulator

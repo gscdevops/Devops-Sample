@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: {{ .Values.ocpdc.persistentVolClaim.name }}
+    namespace: {{ .Release.Namespace }}
+spec:
+    storageClassName: green
+    accessModes:
+    -   ReadWriteMany
+    resources:
+        requests:
+            storage: {{ .Values.ocpdc.persistentVol.capacity }}
