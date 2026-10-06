@@ -1,2 +1,2 @@
-Git skill testing
+Conflict testing
 
